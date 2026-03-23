@@ -9,7 +9,7 @@ struct symTableBinding
 {
     const char *key; 
     const void  *value;
-    struct symTableBinding *psNextBinding;
+    struct symTableBinding* psNextBinding;
 };
 
 struct Table 
@@ -22,6 +22,9 @@ SymTable_T SymTable_new(void)
 {                     
     SymTable_T newSymTable;
     newSymTable = malloc(sizeof(struct Table)); 
+    if(newSymTable == NULL){
+        return 0;
+    }
     if (newSymTable == NULL) return NULL;
     newSymTable->firstBinding = NULL;
     newSymTable->size = 0;
@@ -63,12 +66,20 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey, const void *pvValue)
         }
     }
     newBinding = malloc(sizeof(*newBinding));
+    if(newBinding == NULL){
+        return 0;
+    }
     newBinding->key = (const char*)malloc(strlen(pcKey)+1);
+    if(newBinding->key == NULL) {
+    free(newBinding);
+    return 0;
+    }
     strcpy((char*)newBinding->key, pcKey);
     newBinding->value = pvValue;      
     newBinding->psNextBinding = oSymTable->firstBinding;
     oSymTable->size++;
     oSymTable->firstBinding = newBinding;
+    return 1;
 }
 
 void *SymTable_replace(SymTable_T oSymTable, const char *pcKey, const void *pvValue)
@@ -81,7 +92,7 @@ void *SymTable_replace(SymTable_T oSymTable, const char *pcKey, const void *pvVa
          psCurrentBinding = psCurrentBinding->psNextBinding)
     {
         if(strcmp(pcKey, psCurrentBinding->key) == 0){
-            oldValue = psCurrentBinding->value;         
+            oldValue = (void*) psCurrentBinding->value;         
             psCurrentBinding->value = pvValue;         
             return oldValue;                         
         }
@@ -111,7 +122,7 @@ void *SymTable_get(SymTable_T oSymTable, const char *pcKey)
          psCurrentBinding = psCurrentBinding->psNextBinding)
     {
         if(strcmp(pcKey, psCurrentBinding->key) == 0)
-        return psCurrentBinding->value;                    
+        return (void*) psCurrentBinding->value;                    
     }
         return NULL;
 }
@@ -135,7 +146,7 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
             } else {       
                 psPreviousBinding->psNextBinding = psCurrentBinding->psNextBinding;
             }
-            oldValue = psCurrentBinding->value;
+            oldValue = (void*) psCurrentBinding->value;
             oSymTable->size--;
             free(psCurrentBinding);
             return oldValue;
