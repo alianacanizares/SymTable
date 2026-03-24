@@ -38,13 +38,13 @@ static size_t SymTable_hash(const char *pcKey, size_t uBucketCount)
 SymTable_T SymTable_new(void)
 {
     SymTable_T newSymTable;
+    int i;
+    struct hashTableBinding** arr = newSymTable->buckets;
     newSymTable = malloc(sizeof(struct Table));
     if (newSymTable == NULL) return NULL;
-    int i;
     newSymTable->bucketCount = BUCKET_COUNT; 
     newSymTable->listSize = 0;
     newSymTable->buckets = (struct hashTableBinding**) malloc(sizeof(struct hashTableBinding*) * BUCKET_COUNT);
-    struct hashTableBinding** arr = newSymTable->buckets;
     for (i = 0; i < BUCKET_COUNT; i++) {
         arr[i]=NULL;                         
     }  
@@ -187,8 +187,25 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
     return NULL;
 }
 
-/*
+
 void SymTable_map(SymTable_T oSymTable,
      void (*pfApply)(const char *pcKey, void *pvValue, void *pvExtra),
-     const void *pvExtra);
-     */
+     const void *pvExtra)
+{
+        size_t psCurrentBucket = 0;
+        struct hashTableBinding *psCurrentBinding;
+        
+    for (psCurrentBucket = 0; 
+         psCurrentBucket < oSymTable->bucketCount;
+         psCurrentBucket++) 
+    {
+        for (psCurrentBinding = oSymTable->buckets[psCurrentBucket];
+             psCurrentBinding != NULL;
+             psCurrentBinding = psCurrentBinding->psNextBinding)
+             {
+                (*pfApply)(psCurrentBinding->key, psCurrentBinding->value,
+                (void*)pvExtra);
+             }
+    }
+}
+     

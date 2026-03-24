@@ -385,7 +385,7 @@ static void testRemove(void)
 
 /* Test the SymTable_map() function. */
 
-/*static void testMap(void)
+static void testMap(void)
 {
    SymTable_T oSymTable;
    char acJeter[] = "Jeter";
@@ -427,7 +427,7 @@ static void testRemove(void)
    SymTable_map(oSymTable, printBindingSimple, NULL);
 
    SymTable_free(oSymTable);
-}
+} 
 
 /*--------------------------------------------------------------------*/
 

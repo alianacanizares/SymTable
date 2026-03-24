@@ -3,6 +3,9 @@
 #define SYM_INCLUDED
 
 #include <stddef.h>
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
 
 struct Table;
 typedef struct Table *SymTable_T;

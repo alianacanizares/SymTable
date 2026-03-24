@@ -154,8 +154,16 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
     }
     return NULL;
 }
-/*
+
 void SymTable_map(SymTable_T oSymTable,
      void (*pfApply)(const char *pcKey, void *pvValue, void *pvExtra),
-     const void *pvExtra);
-*/
+     const void *pvExtra)
+{
+    struct symTableBinding *psCurrentBinding;
+    for (psCurrentBinding = oSymTable->firstBinding;
+         psCurrentBinding != NULL;
+         psCurrentBinding = psCurrentBinding->psNextBinding)
+    {
+        (*pfApply)(psCurrentBinding->key, (void*)psCurrentBinding->value, (void*)pvExtra);
+    }
+}
