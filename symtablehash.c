@@ -6,17 +6,26 @@
 #include <string.h>
 #include "symtable.h"
 
+/* global variables for expansion */
 enum {BUCKET_COUNT = 509};
 
+/* struct object for bindings that has key, value, and pointer to psNextBinding*/
 struct hashTableBinding {
+    /* key for each binding */
     const char *key;
+    /* value associated */
     const void *value;
-    struct hashBinding *psNextBinding;
+    /* pointer to next binding */
+    struct hashTableBinding *psNextBinding;
 };
 
+/* struct object that has buckets, listSize, and bucketcount */
 struct Table {
+    /* pointer to pointer of bindings */
     struct hashTableBinding **buckets;
+    /* amount of bindings */
     size_t listSize;
+    /* amount of buckets in array */
     size_t bucketCount;
 };
 
@@ -59,7 +68,7 @@ void SymTable_free(SymTable_T oSymTable)
 {
     size_t psCurrentBinding;
     struct hashTableBinding* currentBinding;
-    if (oSymTable == NULL) return NULL;
+    if (oSymTable == NULL) return;
     for (psCurrentBinding = 0;
          psCurrentBinding < oSymTable->bucketCount;          
          psCurrentBinding++)             
@@ -88,9 +97,10 @@ int SymTable_put(SymTable_T oSymTable,
 {
     struct hashTableBinding *psCurrentBinding;
     struct hashTableBinding *newBinding;
+    size_t hashedAddress;
     assert(pcKey != NULL);
     assert(oSymTable != NULL);
-    size_t hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
+    hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
     for (psCurrentBinding = oSymTable->buckets[hashedAddress]; 
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding) 
@@ -110,7 +120,8 @@ int SymTable_put(SymTable_T oSymTable,
     newBinding->value = (void*) pvValue; 
     newBinding->psNextBinding = oSymTable->buckets[hashedAddress];
     oSymTable->listSize++;
-    oSymTable->buckets[hashedAddress] = newBinding;                     
+    oSymTable->buckets[hashedAddress] = newBinding;      
+    return 1;               
 }
 
 
@@ -119,14 +130,16 @@ void *SymTable_replace(SymTable_T oSymTable,
 {
     struct hashTableBinding *psCurrentBinding;
     void *oldValue;
+    size_t hashedAddress = 0;
     assert(oSymTable != NULL);
-    size_t hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
+    assert(pcKey != NULL);
+    hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
     for (psCurrentBinding = oSymTable->buckets[hashedAddress]; 
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding) 
     {
         if(strcmp(pcKey, psCurrentBinding->key) == 0) {
-        oldValue = psCurrentBinding->value;         
+        oldValue = (void *)psCurrentBinding->value;         
         psCurrentBinding->value = pvValue;         
         return oldValue;    
         }
@@ -138,6 +151,7 @@ int SymTable_contains(SymTable_T oSymTable, const char *pcKey)
 {
     struct hashTableBinding *psCurrentBinding;
     size_t hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
+    assert(pcKey != NULL);
     for (psCurrentBinding = oSymTable->buckets[hashedAddress]; 
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding) 
@@ -152,13 +166,15 @@ int SymTable_contains(SymTable_T oSymTable, const char *pcKey)
 void *SymTable_get(SymTable_T oSymTable, const char *pcKey)
 {
     struct hashTableBinding *psCurrentBinding;
-    size_t hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
+    size_t hashedAddress;
+    assert(pcKey != NULL);
+    hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
     for (psCurrentBinding = oSymTable->buckets[hashedAddress]; 
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding) 
     {
         if(strcmp(pcKey, psCurrentBinding->key) == 0)
-        return psCurrentBinding->value;   
+        return (void *)psCurrentBinding->value;   
     }
         return NULL;
 }
@@ -168,7 +184,9 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
     struct hashTableBinding *psCurrentBinding;
     struct hashTableBinding *psPreviousBinding = NULL;
     void *oldValue;
-    size_t hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
+    size_t hashedAddress;
+    assert(pcKey != NULL);
+    hashedAddress = SymTable_hash(pcKey, oSymTable->bucketCount);
     for (psCurrentBinding = oSymTable->buckets[hashedAddress];
          psCurrentBinding != NULL;
          psPreviousBinding = psCurrentBinding,
@@ -182,7 +200,7 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
             } else {       
                 psPreviousBinding->psNextBinding = psCurrentBinding->psNextBinding;
             }
-            oldValue = psCurrentBinding->value;
+            oldValue = (void *)psCurrentBinding->value;
             oSymTable->listSize--;
             free(psCurrentBinding);
             return oldValue;
@@ -207,7 +225,7 @@ void SymTable_map(SymTable_T oSymTable,
              psCurrentBinding != NULL;
              psCurrentBinding = psCurrentBinding->psNextBinding)
              {
-                (*pfApply)(psCurrentBinding->key, psCurrentBinding->value,
+                (*pfApply)(psCurrentBinding->key, (void *)psCurrentBinding->value,
                 (void*)pvExtra);
              }
     }
