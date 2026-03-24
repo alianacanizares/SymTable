@@ -1,3 +1,4 @@
+/* symtablehash.c - hash table implementation of symbol table */
 
 #include <assert.h>
 #include <stdlib.h>
@@ -38,15 +39,18 @@ static size_t SymTable_hash(const char *pcKey, size_t uBucketCount)
 SymTable_T SymTable_new(void)
 {
     SymTable_T newSymTable;
-    int i;
-    struct hashTableBinding** arr = newSymTable->buckets;
+    size_t i;
     newSymTable = malloc(sizeof(struct Table));
     if (newSymTable == NULL) return NULL;
     newSymTable->bucketCount = BUCKET_COUNT; 
     newSymTable->listSize = 0;
-    newSymTable->buckets = (struct hashTableBinding**) malloc(sizeof(struct hashTableBinding*) * BUCKET_COUNT);
-    for (i = 0; i < BUCKET_COUNT; i++) {
-        arr[i]=NULL;                         
+    newSymTable->buckets = malloc(sizeof(struct hashTableBinding*) * newSymTable->bucketCount);
+    if(newSymTable->buckets == NULL) {
+        free(newSymTable);
+        return NULL;
+    }
+    for (i = 0; i < newSymTable->bucketCount; i++) {
+        newSymTable->buckets[i]=NULL;                         
     }  
     return newSymTable;
 }

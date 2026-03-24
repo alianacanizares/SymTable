@@ -1,3 +1,4 @@
+/* symtablist.c - linked list implementation of symbol table */
 
 #include <assert.h>
 #include <stdlib.h>
@@ -5,25 +6,33 @@
 #include <string.h>
 #include "symtable.h"
 
+/* Binding struct */
 struct symTableBinding 
 {
+    /* key string */
     const char *key; 
+    /* value */
     const void  *value;
+    /* pointer to nextBinding */
     struct symTableBinding* psNextBinding;
 };
 
+/* Table struct*/
 struct Table 
 {
+    /* first binding in list */
     struct symTableBinding* firstBinding;
-    int size;
+    /* amount of bindings in list */
+    size_t size;
 };
 
+/* creates new SymTable */
 SymTable_T SymTable_new(void) 
 {                     
     SymTable_T newSymTable;
     newSymTable = malloc(sizeof(struct Table)); 
     if(newSymTable == NULL){
-        return 0;
+        return NULL;
     }
     if (newSymTable == NULL) return NULL;
     newSymTable->firstBinding = NULL;
@@ -31,6 +40,7 @@ SymTable_T SymTable_new(void)
     return newSymTable;
 }
 
+/* Frees memory in each binding of oSymTable, then frees oSymTable */
 void SymTable_free(SymTable_T oSymTable) 
 {
     struct symTableBinding *psCurrentBinding;
@@ -46,17 +56,20 @@ void SymTable_free(SymTable_T oSymTable)
         free(oSymTable);
 }
 
-
+/* Returns number of bindings in oSymTable */
 size_t SymTable_getLength(SymTable_T oSymTable) 
 {   
     return oSymTable->size;
 }
 
+/* Puts a binding with pcKey and pvValue into oSymTable */
 int SymTable_put(SymTable_T oSymTable, const char *pcKey, const void *pvValue) 
 {
     struct symTableBinding *psCurrentBinding;
     struct symTableBinding *newBinding;
     assert(oSymTable != NULL);
+    assert(pcKey != NULL);
+
     for (psCurrentBinding = oSymTable->firstBinding; 
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding) 
@@ -82,11 +95,13 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey, const void *pvValue)
     return 1;
 }
 
+/* Replaces a binding with given pcKey and pvValue in oSymTable */
 void *SymTable_replace(SymTable_T oSymTable, const char *pcKey, const void *pvValue)
 {
     struct symTableBinding *psCurrentBinding;
     void *oldValue;
     assert(oSymTable != NULL);
+    assert(pcKey != NULL);
     for (psCurrentBinding = oSymTable->firstBinding;
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding)
@@ -100,9 +115,11 @@ void *SymTable_replace(SymTable_T oSymTable, const char *pcKey, const void *pvVa
         return NULL;
 }
 
+/* Checks if oSymTable contains pcKey */
 int SymTable_contains(SymTable_T oSymTable, const char *pcKey)
 {
     struct symTableBinding *psCurrentBinding;
+    assert(pcKey != NULL);
     for (psCurrentBinding = oSymTable->firstBinding;
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding)
@@ -114,9 +131,11 @@ int SymTable_contains(SymTable_T oSymTable, const char *pcKey)
     return 0;
 }
 
+/* Returns value of given pcKey in oSymTable */
 void *SymTable_get(SymTable_T oSymTable, const char *pcKey)
 {
     struct symTableBinding *psCurrentBinding;
+    assert(pcKey != NULL);
     for (psCurrentBinding = oSymTable->firstBinding;
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding)
@@ -127,12 +146,13 @@ void *SymTable_get(SymTable_T oSymTable, const char *pcKey)
         return NULL;
 }
 
+/* Removes pcKey in oSymTable and frees memory */
 void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
 {
     struct symTableBinding *psCurrentBinding;
     struct symTableBinding *psPreviousBinding = NULL;
-
     void *oldValue;
+    assert(pcKey != NULL);
     for (psCurrentBinding = oSymTable->firstBinding;
          psCurrentBinding != NULL;
          psPreviousBinding = psCurrentBinding,
@@ -155,11 +175,13 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
     return NULL;
 }
 
+/* Maps the given pcKey, pvValue, pvExtra to a binding in oSymTable */
 void SymTable_map(SymTable_T oSymTable,
      void (*pfApply)(const char *pcKey, void *pvValue, void *pvExtra),
      const void *pvExtra)
 {
     struct symTableBinding *psCurrentBinding;
+    assert(pfApply != NULL);
     for (psCurrentBinding = oSymTable->firstBinding;
          psCurrentBinding != NULL;
          psCurrentBinding = psCurrentBinding->psNextBinding)

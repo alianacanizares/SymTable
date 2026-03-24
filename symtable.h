@@ -1,4 +1,4 @@
-
+/* header file for symboltable implementation */
 #ifndef SYM_INCLUDED
 #define SYM_INCLUDED
 
@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 struct Table;
+/* typedef for struct table */
 typedef struct Table *SymTable_T;
 
 
@@ -25,7 +26,7 @@ Otherwise the function must leave oSymTable unchanged and return 0 (FALSE).
 If insufficient memory is available, then the function must leave oSymTable unchanged and return 0 (FALSE). */
 int SymTable_put(SymTable_T oSymTable, const char *pcKey, const void *pvValue);
 
-/* Replace the binding's value with pvValue and return the old value. Otherwise it must leave oSymTable unchanged and return NULL.*/
+/* Replace binding with pcKey with pvValue and return the old value. Otherwise it must leave oSymTable unchanged and return NULL.*/
 void *SymTable_replace(SymTable_T oSymTable, const char *pcKey, const void *pvValue);
 
 /* Return 1 (TRUE) if oSymTable contains a binding whose key is pcKey, and 0 (FALSE) otherwise. */ 
@@ -34,7 +35,7 @@ int SymTable_contains(SymTable_T oSymTable, const char *pcKey);
 /* Return the value of the binding within oSymTable whose key is pcKey, or NULL if no such binding exists. */
 void *SymTable_get(SymTable_T oSymTable, const char *pcKey);
 
-/* Remove that binding from oSymTable and return the binding's value. 
+/* Remove binding with pcKey from oSymTable and return the binding's value. 
 Otherwise the function must not change oSymTable and return NULL.*/
 void *SymTable_remove(SymTable_T oSymTable, const char *pcKey);
 
