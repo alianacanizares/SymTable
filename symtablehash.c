@@ -7,7 +7,10 @@
 #include "symtable.h"
 
 /* global variables for expansion */
-enum {BUCKET_COUNT = 509};
+enum {BUCKET_COUNT_509, BUCKET_COUNT_1021, BUCKET_COUNT_2039, BUCKET_COUNT_4093, BUCKET_COUNT_8191, 
+    BUCKETCOUNT5_16381, BUCKET_COUNT_32749, BUCKET_COUNT_MAX};
+
+static const size_t bucketSize[] = {509, 1021, 2039, 4093, 8191, 16381, 32749, 65521};
 
 /* struct object for bindings that has key, value, and pointer to psNextBinding*/
 struct hashTableBinding {
@@ -51,7 +54,7 @@ SymTable_T SymTable_new(void)
     size_t i;
     newSymTable = malloc(sizeof(struct Table));
     if (newSymTable == NULL) return NULL;
-    newSymTable->bucketCount = BUCKET_COUNT; 
+    newSymTable->bucketCount = bucketSize[0]; 
     newSymTable->listSize = 0;
     newSymTable->buckets = malloc(sizeof(struct hashTableBinding*) * newSymTable->bucketCount);
     if(newSymTable->buckets == NULL) {
@@ -92,6 +95,51 @@ size_t SymTable_getLength(SymTable_T oSymTable)
     return oSymTable->listSize;
 }
 
+static void SymTable_expand(SymTable_T oSymTable)
+{
+    size_t i = 0;
+    size_t newBucketCount = 0;
+    size_t newHashedAddress = 0;
+    struct hashTableBinding **newBuckets;
+    struct hashTableBinding *psCurrentBinding;
+    struct hashTableBinding *psNextBinding;
+    for (i = 0; i < BUCKET_COUNT_MAX; i++)
+    {
+        if(oSymTable->listSize > bucketSize[i]) {
+            newBucketCount = bucketSize[i + 1];
+            break;
+         }
+    }
+    if (i == BUCKET_COUNT_MAX)
+        return;
+
+    newBuckets = malloc(newBucketCount * sizeof(*newBuckets));
+    if(newBuckets == NULL) {
+        return;
+    }
+    for (i = 0; i < newBucketCount; i++) {
+    newBuckets[i] = NULL;
+    }
+    for (i = 0; i < oSymTable->bucketCount; i++) {
+        psCurrentBinding = oSymTable->buckets[i];
+        while(psCurrentBinding != NULL) {
+            /* saving next pointer before changing */
+            psNextBinding = psCurrentBinding->psNextBinding;
+            /* new hashed address using new bucket count*/
+            newHashedAddress = SymTable_hash(psCurrentBinding->key, newBucketCount);
+            /* saving next before changing pointer */
+            psCurrentBinding->psNextBinding = newBuckets[newHashedAddress];
+            /* changing to point to new head */
+            newBuckets[newHashedAddress] = psCurrentBinding;
+            /* moving back to original place */
+            psCurrentBinding = psNextBinding;
+        }
+    }
+    free(oSymTable->buckets);
+    oSymTable->buckets = newBuckets;
+    oSymTable->bucketCount = newBucketCount;
+}
+
 int SymTable_put(SymTable_T oSymTable,
      const char *pcKey, const void *pvValue)
 {
@@ -119,8 +167,11 @@ int SymTable_put(SymTable_T oSymTable,
     strcpy((char*)newBinding->key, pcKey);
     newBinding->value = (void*) pvValue; 
     newBinding->psNextBinding = oSymTable->buckets[hashedAddress];
+    oSymTable->buckets[hashedAddress] = newBinding;   
     oSymTable->listSize++;
-    oSymTable->buckets[hashedAddress] = newBinding;      
+
+    SymTable_expand(oSymTable);
+
     return 1;               
 }
 
