@@ -3,7 +3,7 @@ Assignment 3 readme File
 ------------------------------------------------------------------------
 What is your name?
 
-
+Aliana Canizares
 
 ------------------------------------------------------------------------
 What authorized sources of information did you use to complete the
@@ -12,6 +12,9 @@ in the "Policies" web page (also available on armlab in the file
 ~cos217/AuthorizedSourcesList ) to this section of the readme file,
 and edit it as appropriate.
 
+course's lectures, precepts, website, textbooks and manuals (including the man pages from the armlab cluster)
+instructors in office hours (Polly's office hours)
+COS Intro LabTAs for debugging help (Stephen)
 
 
 ------------------------------------------------------------------------
@@ -26,6 +29,7 @@ interaction, may additionally require the interaction being reported
 to the Committee on Discipline. Write "None" if you used no
 unauthorized sources of information.
 
+None
 
 
 ------------------------------------------------------------------------
@@ -36,7 +40,7 @@ enter your name in the space below the following affirmation:
 This paper represents my own work in accordance with University
 regulations.
 
-
+Aliana Canizares
 
 ------------------------------------------------------------------------
 In fulfillment of the requirement from section 2.4.6 of the Academic
@@ -44,12 +48,12 @@ Regulations in Princeton's Rights, Rules, Responsibilities guide,
 and the COS 217 Generative AI policy, disclose and describe how you
 used AI in completing this assignment:
 
-
+To help better understand some splint warning errors and compiling warnings;
 
 ------------------------------------------------------------------------
 What is your assessment of the assignment? Was it helpful? Was it fun?
 
-
+Very helpful in understanding strucks
 
 ------------------------------------------------------------------------
 (optional) What information can you provide about your submission that
@@ -64,7 +68,7 @@ disagreements with them? Copy the splint warnings here, and express your
 disagreement after each warning. If there are no warnings, then write
 "None."
 
-
+None
 
 ------------------------------------------------------------------------
 What warnings does critTer generate on symtablelist.c, and what are your
@@ -73,6 +77,17 @@ your disagreement after each warning. If there are no warnings, then
 write "None."
 
 
+   symtablelist.c: line 67: medium priority:
+   Do you want to validate 'pvValue' through an assert?
+
+   symtablelist.c: line 100: medium priority:
+   Do you want to validate 'pvValue' through an assert?
+
+   symtablelist.c: line 182: medium priority:
+   Do you want to validate 'pvExtra' through an assert?
+
+   pvValue and pvxtra do not need to be asserted as they
+    don't necessarily can't be null.
 
 ------------------------------------------------------------------------
 What warnings does splint generate on symtablehash.c, and what are your
@@ -80,7 +95,13 @@ disagreements with them? Copy the splint warnings here, and express your
 disagreement after each warning. If there are no warnings, then write
 "None."
 
+symtablehash.c: (in function SymTable_expand)
+symtablehash.c:133:47: Value newBuckets[] used before definition
+  An rvalue is used that may not be initialized to a value on some execution
+  path. (Use -usedef to inhibit warning)
 
+  I initialize my newBuckets in my for loop but it seems to not register
+  but my function works as necessary.
 
 ------------------------------------------------------------------------
 What warnings does critTer generate on symtablehash.c, and what are your
@@ -88,7 +109,17 @@ disagreements with them? Copy the critTer warnings here, and express
 your disagreement after each warning. If there are no warnings, then
 write "None."
 
+symtablehash.c: line 147: medium priority:
+Do you want to validate 'pvValue' through an assert?
+symtablehash.c: line 183: medium priority:
+Do you want to validate 'pvValue' through an assert?
+symtablehash.c: line 269: medium priority:
+Do you want to validate 'pfApply' through an assert?
+symtablehash.c: line 269: medium priority:
+Do you want to validate 'pvExtra' through an assert?
 
+I disagree with these warnings as pvValue could be NULL and pfApply and pvExtra
+as well, it's not necessary to assert that they're not NULL.
 
 ------------------------------------------------------------------------
 What are the CPU times reported by testsymtable.c with binding counts
@@ -97,22 +128,22 @@ implementation, (2) your non-expanding hash table implementation, and
 (3) your expanding hash table implementation? Fill in the blanks.
 
 The linked list implementation with:
--- 50 bindings consumed ________ seconds.
--- 500 bindings consumed ________ seconds.
--- 5000 bindings consumed ________ seconds.
--- 50000 bindings consumed ________ seconds.
--- 500000 bindings consumed ________ seconds.
+-- 50 bindings consumed 0.000000 seconds.
+-- 500 bindings consumed 0.000000 seconds.
+-- 5000 bindings consumed 0.111353 seconds.
+-- 50000 bindings consumed 20.332284 seconds. 21.389435
+-- 500000 bindings consumed program gets killed seconds. 
 
 The non-expanding hash table implementation with:
--- 50 bindings consumed ________ seconds.
--- 500 bindings consumed ________ seconds.
--- 5000 bindings consumed ________ seconds.
--- 50000 bindings consumed ________ seconds.
--- 500000 bindings consumed ________ seconds.
+-- 50 bindings consumed 0.000000 seconds.
+-- 500 bindings consumed 0.000000 seconds.
+-- 5000 bindings consumed 0.000000 seconds.
+-- 50000 bindings consumed 0.149549 seconds.
+-- 500000 bindings consumed 33.677167 seconds.
 
 The expanding hash table implementation with:
--- 50 bindings consumed ________ seconds.
--- 500 bindings consumed ________ seconds.
--- 5000 bindings consumed ________ seconds.
--- 50000 bindings consumed ________ seconds.
--- 500000 bindings consumed ________ seconds.
+-- 50 bindings consumed 0.000000 seconds.
+-- 500 bindings consumed 0.000000 seconds.
+-- 5000 bindings consumed 0.000000  seconds.
+-- 50000 bindings consumed 0.019916 seconds.
+-- 500000 bindings consumed 0.394516 seconds.

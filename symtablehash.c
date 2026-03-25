@@ -10,6 +10,7 @@
 enum {BUCKET_COUNT_509, BUCKET_COUNT_1021, BUCKET_COUNT_2039, BUCKET_COUNT_4093, BUCKET_COUNT_8191, 
     BUCKETCOUNT5_16381, BUCKET_COUNT_32749, BUCKET_COUNT_MAX};
 
+/* array of bucket sizes */
 static const size_t bucketSize[] = {509, 1021, 2039, 4093, 8191, 16381, 32749, 65521};
 
 /* struct object for bindings that has key, value, and pointer to psNextBinding*/
@@ -71,6 +72,7 @@ void SymTable_free(SymTable_T oSymTable)
 {
     size_t psCurrentBinding;
     struct hashTableBinding* currentBinding;
+    struct hashTableBinding* nextBinding;
     if (oSymTable == NULL) return;
     for (psCurrentBinding = 0;
          psCurrentBinding < oSymTable->bucketCount;          
@@ -79,9 +81,10 @@ void SymTable_free(SymTable_T oSymTable)
         currentBinding = oSymTable->buckets[psCurrentBinding];
         while(currentBinding != NULL) 
         {
+        nextBinding = currentBinding->psNextBinding;
         free((char*)currentBinding->key);
         free(currentBinding);
-        currentBinding = currentBinding->psNextBinding;
+        currentBinding = nextBinding;
         }
 
     }
@@ -95,6 +98,7 @@ size_t SymTable_getLength(SymTable_T oSymTable)
     return oSymTable->listSize;
 }
 
+/* helper function that handles expansion by taking in oSymTable */
 static void SymTable_expand(SymTable_T oSymTable)
 {
     size_t i = 0;
@@ -105,13 +109,14 @@ static void SymTable_expand(SymTable_T oSymTable)
     struct hashTableBinding *psNextBinding;
     for (i = 0; i < BUCKET_COUNT_MAX; i++)
     {
-        if(oSymTable->listSize > bucketSize[i]) {
-            newBucketCount = bucketSize[i + 1];
+        if(bucketSize[i] == oSymTable->bucketCount) {
             break;
          }
     }
     if (i == BUCKET_COUNT_MAX)
         return;
+    
+    newBucketCount = bucketSize[i + 1];
 
     newBuckets = malloc(newBucketCount * sizeof(*newBuckets));
     if(newBuckets == NULL) {
@@ -122,7 +127,7 @@ static void SymTable_expand(SymTable_T oSymTable)
     }
     for (i = 0; i < oSymTable->bucketCount; i++) {
         psCurrentBinding = oSymTable->buckets[i];
-        while(psCurrentBinding != NULL) {
+        while(psCurrentBinding != NULL) { 
             /* saving next pointer before changing */
             psNextBinding = psCurrentBinding->psNextBinding;
             /* new hashed address using new bucket count*/
@@ -134,11 +139,11 @@ static void SymTable_expand(SymTable_T oSymTable)
             /* moving back to original place */
             psCurrentBinding = psNextBinding;
         }
-    }
+    } 
     free(oSymTable->buckets);
     oSymTable->buckets = newBuckets;
     oSymTable->bucketCount = newBucketCount;
-}
+} 
 
 int SymTable_put(SymTable_T oSymTable,
      const char *pcKey, const void *pvValue)
@@ -253,6 +258,7 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
             }
             oldValue = (void *)psCurrentBinding->value;
             oSymTable->listSize--;
+            free((char*)psCurrentBinding->key);
             free(psCurrentBinding);
             return oldValue;
     }

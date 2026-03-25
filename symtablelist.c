@@ -51,6 +51,7 @@ void SymTable_free(SymTable_T oSymTable)
          psCurrentBinding = psNextBinding)             
     {
         psNextBinding = psCurrentBinding->psNextBinding;
+        free((char*)psCurrentBinding->key);
         free(psCurrentBinding);
     }
         free(oSymTable);
@@ -168,6 +169,7 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey)
             }
             oldValue = (void*) psCurrentBinding->value;
             oSymTable->size--;
+            free((char*)psCurrentBinding->key);
             free(psCurrentBinding);
             return oldValue;
     }
